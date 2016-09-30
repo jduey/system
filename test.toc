@@ -1,0 +1,22 @@
+
+(add-ns sys (module "system.toc"))
+
+(main [_]
+      ;; (println :home (get-environment "poop"))
+      ;; (println :curr-dir (or (current-directory)
+      ;;                        (maybe (error-string))))
+      ;; (println :make-dir (make-directory "bogus" 509))
+      ;; (println :new-dir (or (change-directory "bogus")
+      ;;                       (maybe (error-string))))
+      ;; (println :curr-dir (current-directory))
+      ;; (println :new-dir (map (get-environment "HOME")
+      ;;                        change-directory))
+      ;; (exec "/bin/ls" (list "ls"))
+      ;; (println :whut)
+
+      (println :sleeping)
+      (sys/sleep 5)
+      (println :woke)
+
+      ;; (println (fork))
+      )
