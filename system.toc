@@ -1,18 +1,18 @@
 
-(inline-text "#include <stdlib.h>")
-(inline-text "#include <errno.h>")
-(inline-text "#include <unistd.h>")
-(inline-text "#include <sys/stat.h>")
-(inline-text "#include <limits.h>")
-(inline-text "#include <dirent.h>")
+(inline-C "#include <stdlib.h>")
+(inline-C "#include <errno.h>")
+(inline-C "#include <unistd.h>")
+(inline-C "#include <sys/stat.h>")
+(inline-C "#include <limits.h>")
+(inline-C "#include <dirent.h>")
 
 (defn sleep [seconds]
-  (inline-text Number "
+  (inline-C Number "
     return(numberValue(sleep(((Number *)arg0)->numVal)));
 "))
 
 (defn realpath [path]
-  (inline-text Maybe "
+  (inline-C Maybe "
     String *arg0Str = nullTerm(arg0);
     char actualpath [PATH_MAX+1];
     char *ptr;
@@ -30,7 +30,7 @@
 "))
 
 (defn access [file-path]
-  (inline-text Maybe "
+  (inline-C Maybe "
     String *arg0Str = nullTerm(arg0);
 
     if (access(arg0Str->buffer, F_OK) == -1) {
@@ -43,7 +43,7 @@
 "))
 
 (defn dir-exists? [path]
-  (inline-text Maybe "
+  (inline-C Maybe "
     String *arg0Str = nullTerm(arg0);
     struct stat sb;
 
@@ -59,20 +59,20 @@
     }
 "))
 
-(def S_IRUSR (inline-text Number "(Value *)&(Number){NumberType,-1,S_IRUSR}"))
-(def S_IWUSR (inline-text Number "(Value *)&(Number){NumberType,-1,S_IWUSR}"))
-(def S_IXUSR (inline-text Number "(Value *)&(Number){NumberType,-1,S_IXUSR}"))
-(def S_IEXEC (inline-text Number "(Value *)&(Number){NumberType,-1,S_IEXEC}"))
-(def S_IRGRP (inline-text Number "(Value *)&(Number){NumberType,-1,S_IRGRP}"))
-(def S_IWGRP (inline-text Number "(Value *)&(Number){NumberType,-1,S_IWGRP}"))
-(def S_IXGRP (inline-text Number "(Value *)&(Number){NumberType,-1,S_IXGRP}"))
-(def S_IRWXG (inline-text Number "(Value *)&(Number){NumberType,-1,S_IRWXG}"))
-(def S_IROTH (inline-text Number "(Value *)&(Number){NumberType,-1,S_IROTH}"))
-(def S_IWOTH (inline-text Number "(Value *)&(Number){NumberType,-1,S_IWOTH}"))
-(def S_IXOTH (inline-text Number "(Value *)&(Number){NumberType,-1,S_IXOTH}"))
+(def S_IRUSR (inline-C Number "(Value *)&(Number){NumberType,-1,S_IRUSR}"))
+(def S_IWUSR (inline-C Number "(Value *)&(Number){NumberType,-1,S_IWUSR}"))
+(def S_IXUSR (inline-C Number "(Value *)&(Number){NumberType,-1,S_IXUSR}"))
+(def S_IEXEC (inline-C Number "(Value *)&(Number){NumberType,-1,S_IEXEC}"))
+(def S_IRGRP (inline-C Number "(Value *)&(Number){NumberType,-1,S_IRGRP}"))
+(def S_IWGRP (inline-C Number "(Value *)&(Number){NumberType,-1,S_IWGRP}"))
+(def S_IXGRP (inline-C Number "(Value *)&(Number){NumberType,-1,S_IXGRP}"))
+(def S_IRWXG (inline-C Number "(Value *)&(Number){NumberType,-1,S_IRWXG}"))
+(def S_IROTH (inline-C Number "(Value *)&(Number){NumberType,-1,S_IROTH}"))
+(def S_IWOTH (inline-C Number "(Value *)&(Number){NumberType,-1,S_IWOTH}"))
+(def S_IXOTH (inline-C Number "(Value *)&(Number){NumberType,-1,S_IXOTH}"))
 
 (defn file-stat* [path]
-  (inline-text Maybe "
+  (inline-C Maybe "
     String *arg0Str = nullTerm(arg0);
     struct stat sb;
     List *infoList = empty_list;
@@ -102,7 +102,7 @@
 "))
 
 (defn file-list* [path]
-  (inline-text Maybe "
+  (inline-C Maybe "
     String *arg0Str = nullTerm(arg0);
     struct stat sb;
 
@@ -159,7 +159,7 @@
          extract)))
 
 (defn get-environment [variable-name]
-  (inline-text Maybe "
+  (inline-C Maybe "
   char *var;
   if (arg0->type == StringType)
     var = ((String *)arg0)->buffer;
@@ -185,12 +185,12 @@
 "))
 
 (defn error-number []
-  (inline-text Number "
+  (inline-C Number "
   return(numberValue(errno));
 "))
 
 (defn error-string []
-  (inline-text Maybe "
+  (inline-C Maybe "
   char errStr[1000];
   strerror_r(errno, errStr, 1000);
   int64_t len = strlen(errStr);
@@ -202,7 +202,7 @@
 "))
 
 (defn change-directory [path]
-  (inline-text Maybe "
+  (inline-C Maybe "
   char *path;
   if (arg0->type == StringType)
     path = ((String *)arg0)->buffer;
@@ -220,7 +220,7 @@
 "))
 
 (defn current-directory []
-  (inline-text Maybe "
+  (inline-C Maybe "
   char path[1000];
   if (getcwd(path, 1000) == NULL) {
     return(nothing);
@@ -235,7 +235,7 @@
 "))
 
 (defn make-directory [path mode]
-  (inline-text Maybe "
+  (inline-C Maybe "
   char *path;
   if (arg0->type == StringType)
     path = ((String *)arg0)->buffer;
@@ -256,7 +256,7 @@
   ([path]
    (exec path empty-list))
   ([path args]
-   (inline-text Maybe "
+   (inline-C Maybe "
   String *path = nullTerm(arg0);;
 
   List *argList = (List *)arg1;
@@ -286,12 +286,12 @@
 ")))
 
 (defn fork []
-  (inline-text Number "
+  (inline-C Number "
   return(numberValue(fork()));
 "))
 
 (defn waitpid [pid]
-  (inline-text Number "
+  (inline-C Number "
   int rv;
   int pid = (int)((Number *)arg0)->numVal;
   wait(&rv);
