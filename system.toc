@@ -176,12 +176,16 @@
     len = 0;
   else
     len = strlen(envStr);
-  String *strVal = malloc_string(len);
-  if (envStr != NULL)
-    strncpy(strVal->buffer, envStr, len);
-  Value *mv = maybe((List *)0, (Value *)0, (Value *)strVal);
-  dec_and_free((Value *)strVal);
-  return(mv);
+  if (len == 0)
+    return(nothing);
+  else {
+    String *strVal = malloc_string(len);
+    if (envStr != NULL)
+      strncpy(strVal->buffer, envStr, len);
+    Value *mv = maybe((List *)0, (Value *)0, (Value *)strVal);
+    dec_and_free((Value *)strVal);
+    return(mv);
+  }
 "))
 
 (defn error-number []
