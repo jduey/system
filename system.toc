@@ -18,13 +18,13 @@
     char *ptr;
 
     if (realpath(arg0Str->buffer, actualpath) == NULL) {
-      dec_and_free((Value *)arg0Str);
+      dec_and_free((Value *)arg0Str, 1);
       return(nothing);
     } else {
-      dec_and_free((Value *)arg0Str);
+      dec_and_free((Value *)arg0Str, 1);
       Value *sv = stringValue(actualpath);
       Value *mv = maybe((List *)0, (Value *)0, sv);
-      dec_and_free(sv);
+      dec_and_free(sv, 1);
       return(mv);
     }
 "))
@@ -34,10 +34,10 @@
     String *arg0Str = nullTerm(arg0);
 
     if (access(arg0Str->buffer, F_OK) == -1) {
-      dec_and_free((Value *)arg0Str);
+      dec_and_free((Value *)arg0Str, 1);
       return(nothing);
     } else {
-      dec_and_free((Value *)arg0Str);
+      dec_and_free((Value *)arg0Str, 1);
       return(maybe((List *)0, (Value *)0, arg0));
     }
 "))
@@ -49,12 +49,12 @@
 
     if (stat(arg0Str->buffer, &sb) == 0 && S_ISDIR(sb.st_mode))
     {
-      dec_and_free((Value *)arg0Str);
+      dec_and_free((Value *)arg0Str, 1);
       return(maybe((List *)0, (Value *)0, arg0));
     }
     else
     {
-      dec_and_free((Value *)arg0Str);
+      dec_and_free((Value *)arg0Str, 1);
       return(nothing);
     }
 "))
@@ -89,14 +89,14 @@
       infoList = listCons(numberValue(sb.st_ctime), infoList);
       infoList = listCons(numberValue(sb.st_mode), infoList);
 
-      dec_and_free((Value *)arg0Str);
+      dec_and_free((Value *)arg0Str, 1);
       Value *info = maybe((List *)0, (Value *)0, (Value *)infoList);
-      dec_and_free((Value *)infoList);
+      dec_and_free((Value *)infoList, 1);
       return(info);
     }
     else
     {
-      dec_and_free((Value *)arg0Str);
+      dec_and_free((Value *)arg0Str, 1);
       return(nothing);
     }
 "))
@@ -118,17 +118,17 @@
         closedir (dir);
       } else {
         /* could not open directory */
-        dec_and_free((Value *)arg0Str);
+        dec_and_free((Value *)arg0Str, 1);
         return(nothing);
       }
-      dec_and_free((Value *)arg0Str);
+      dec_and_free((Value *)arg0Str, 1);
       Value *entryList = maybe((List *)0, (Value *)0, (Value *)entries);
-      dec_and_free((Value *)entries);
+      dec_and_free((Value *)entries, 1);
       return(entryList);
     }
     else
     {
-      dec_and_free((Value *)arg0Str);
+      dec_and_free((Value *)arg0Str, 1);
       return(nothing);
     }
 "))
@@ -183,7 +183,7 @@
     if (envStr != NULL)
       strncpy(strVal->buffer, envStr, len);
     Value *mv = maybe((List *)0, (Value *)0, (Value *)strVal);
-    dec_and_free((Value *)strVal);
+    dec_and_free((Value *)strVal, 1);
     return(mv);
   }
 "))
@@ -201,7 +201,7 @@
   String *strVal = malloc_string(len);
   strncpy(strVal->buffer, errStr, len);
   Value *mv = maybe((List *)0, (Value *)0, (Value *)strVal);
-  dec_and_free((Value *)strVal);
+  dec_and_free((Value *)strVal, 1);
   return(mv);
 "))
 
@@ -233,7 +233,7 @@
     String *strVal = malloc_string(len);
     strncpy(strVal->buffer, path, len);
     Value *mv = maybe((List *)0, (Value *)0, (Value *)strVal);
-    dec_and_free((Value *)strVal);
+    dec_and_free((Value *)strVal, 1);
     return(mv);
   }
 "))
