@@ -8,8 +8,9 @@
 
 (defn sleep [seconds]
   (inline-C Number "
-    return(numberValue(sleep(((Number *)arg0)->numVal)));
-"))
+  Value *result = numberValue(sleep(((Number *)arg0)->numVal));
+  dec_and_free(arg0, 1);
+  return(result);\n"))
 
 (defn realpath [path]
   (inline-C Maybe "
@@ -18,25 +19,32 @@
     char *ptr;
 
     if (realpath(arg0Str->buffer, actualpath) == NULL) {
+      dec_and_free(arg0, 1);
       dec_and_free((Value *)arg0Str, 1);
       return(nothing);
     } else {
       dec_and_free((Value *)arg0Str, 1);
       Value *sv = stringValue(actualpath);
       Value *mv = maybe((List *)0, (Value *)0, sv);
-      dec_and_free(sv, 1);
       return(mv);
     }
 "))
 
 (defn access [file-path]
   (inline-C Maybe "
+// TODO
+// printf(\"access 1\\n\");
+    incRef(arg0, 1);
     String *arg0Str = nullTerm(arg0);
 
+// printf(\"access 2\\n\");
     if (access(arg0Str->buffer, F_OK) == -1) {
+// printf(\"access 3\\n\");
+      dec_and_free((Value *)arg0, 1);
       dec_and_free((Value *)arg0Str, 1);
       return(nothing);
     } else {
+// printf(\"access 4\\n\");
       dec_and_free((Value *)arg0Str, 1);
       return(maybe((List *)0, (Value *)0, arg0));
     }
@@ -161,29 +169,29 @@
 (defn get-environment [variable-name]
   (inline-C Maybe "
   char *var;
-  if (arg0->type == StringType)
+  if (arg0->type == StringType) {
     var = ((String *)arg0)->buffer;
-  else if (arg0->type == SubStringType)
+  } else if (arg0->type == SubStringType) {
     var = ((SubString *)arg0)->buffer;
-  else {
-    fprintf(stderr, \"\\ninvalid type for 'change-directory'\\n\");
+  } else {
+    fprintf(stderr, \"\\ninvalid type for 'get-environment'\\n\");
     abort();
   }
 
+// TODO: needs mutex
   char *envStr = getenv(var);
+  dec_and_free(arg0, 1);
   int64_t len;
   if (envStr == NULL)
     len = 0;
   else
     len = strlen(envStr);
-  if (len == 0)
+  if (len == 0) {
     return(nothing);
-  else {
+  } else {
     String *strVal = malloc_string(len);
-    if (envStr != NULL)
-      strncpy(strVal->buffer, envStr, len);
+    strncpy(strVal->buffer, envStr, len);
     Value *mv = maybe((List *)0, (Value *)0, (Value *)strVal);
-    dec_and_free((Value *)strVal, 1);
     return(mv);
   }
 "))
@@ -200,9 +208,7 @@
   int64_t len = strlen(errStr);
   String *strVal = malloc_string(len);
   strncpy(strVal->buffer, errStr, len);
-  Value *mv = maybe((List *)0, (Value *)0, (Value *)strVal);
-  dec_and_free((Value *)strVal, 1);
-  return(mv);
+  return((Value *)strVal);
 "))
 
 (defn change-directory [path]
@@ -220,6 +226,7 @@
   if (chdir(path) == 0) {
     return(maybe((List *)0, (Value *)0, (Value *)arg0));
   } else
+    dec_and_free(arg0, 1);
     return(nothing);
 "))
 
@@ -233,7 +240,6 @@
     String *strVal = malloc_string(len);
     strncpy(strVal->buffer, path, len);
     Value *mv = maybe((List *)0, (Value *)0, (Value *)strVal);
-    dec_and_free((Value *)strVal, 1);
     return(mv);
   }
 "))
@@ -251,8 +257,11 @@
   }
 
   if (mkdir(path, ((Number *)arg1)->numVal) == 0) {
+    dec_and_free(arg1, 1);
     return(maybe((List *)0, (Value *)0, (Value *)arg0));
   } else
+    dec_and_free(arg0, 1);
+    dec_and_free(arg1, 1);
     return(nothing);
 "))
 
@@ -286,6 +295,8 @@
     execv(path->buffer, args);
     exit(1);
   }
+  dec_and_free(arg0, 1);
+  dec_and_free(arg1, 1);
   return(nothing);
 ")))
 
@@ -298,6 +309,7 @@
   (inline-C Number "
   int rv;
   int pid = (int)((Number *)arg0)->numVal;
+  dec_and_free(arg0, 1);
   wait(&rv);
   return(numberValue(WEXITSTATUS(rv)));
 "))
